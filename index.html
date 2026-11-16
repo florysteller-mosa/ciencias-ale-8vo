@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula de Ciencias de Ale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+/* Idea: cuaderno de laboratorio a colores. Cada tema tiene su propio color (--h); llaves y palabras clave resaltadas con ese color. */
+:root{
+  --bg:#f4f5fb; --surface:#ffffff; --ink:#1d2433; --muted:#5b6478; --line:#d9dcea;
+  --accent:#5b3fd6; --accent-ink:#ffffff; --soft:#ebe8fb;
+  --good:#17773f; --good-bg:#dcf4e4; --bad:#b32b3a; --bad-bg:#fde2e4; --tip:#7a5200; --tip-bg:#fff0c9;
+  --tint-l:94%; --mark-l:86%; --strong-l:36%; --h:255;
+  --display:"Bricolage Grotesque","Trebuchet MS",sans-serif;
+  --body:"Atkinson Hyperlegible",Verdana,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12141d; --surface:#1b1e2b; --ink:#e9ebf5; --muted:#a2a9bd; --line:#343a50;
+    --accent:#a595ff; --accent-ink:#140b3d; --soft:#272a40;
+    --good:#7fe0a3; --good-bg:#16382a; --bad:#ff9ca6; --bad-bg:#47212a; --tip:#f4cf74; --tip-bg:#3b3117;
+    --tint-l:17%; --mark-l:30%; --strong-l:72%; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12141d; --surface:#1b1e2b; --ink:#e9ebf5; --muted:#a2a9bd; --line:#343a50;
+  --accent:#a595ff; --accent-ink:#140b3d; --soft:#272a40;
+  --good:#7fe0a3; --good-bg:#16382a; --bad:#ff9ca6; --bad-bg:#47212a; --tip:#f4cf74; --tip-bg:#3b3117;
+  --tint-l:17%; --mark-l:30%; --strong-l:72%; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px 48px}
+header{margin:16px 0 0;padding:22px 20px;border-radius:18px;color:#fff;background:linear-gradient(120deg,#5b3fd6,#d6336c 55%,#f08c00)}
+header h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,6vw,42px);line-height:1.1;margin:0;text-wrap:balance}
+header p{margin:6px 0 0}
+#sync{display:inline-block;margin-top:10px;background:#ffffff33;border-radius:99px;padding:3px 12px;font-size:14px;font-weight:700}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 18px;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:2}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 14px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+nav button[aria-current="page"],button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+button:disabled{cursor:default}
+h2{font-family:var(--display);font-size:26px;line-height:1.2;margin:8px 0 10px;text-wrap:balance}
+h3{font-family:var(--display);font-size:19px;margin:22px 0 6px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.stack{display:flex;flex-direction:column;gap:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.th{--strong:hsl(var(--h) 70% var(--strong-l));--tint:hsl(var(--h) 80% var(--tint-l));--mark:hsl(var(--h) 85% var(--mark-l))}
+.topic{display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--line);border-top:7px solid var(--strong);border-radius:14px;padding:14px 16px 16px}
+.topic .num{font-family:var(--display);font-weight:800;color:var(--strong);font-size:15px}
+.topic h3{margin:0;font-size:18px}
+.topic p{margin:0;color:var(--muted);font-size:15px;flex:1}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pill{display:inline-block;border-radius:99px;padding:2px 10px;font-size:13px;font-weight:700;background:var(--soft);color:var(--ink)}
+.pill.ok{background:var(--good-bg);color:var(--good)} .pill.no{background:var(--bad-bg);color:var(--bad)}
+.bar{height:10px;border-radius:99px;background:var(--soft);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#5b3fd6,#d6336c,#f08c00)}
+.lesson{max-width:68ch}
+.lesson h2{color:var(--strong)} .lesson h3{color:var(--strong)}
+.lesson b{background:var(--mark);padding:0 4px;border-radius:5px}
+.lesson table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+.lesson th,.lesson td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+.lesson th{background:var(--tint);color:var(--strong)}
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin:12px 0 6px}
+.key{background:var(--tint);border-left:6px solid var(--strong);border-radius:10px;padding:10px 12px;font-size:15.5px}
+.key strong{display:block;color:var(--strong);font-family:var(--display)}
+.scroll{overflow-x:auto}
+.ex,.tip,.warn{border-radius:10px;padding:12px 14px;margin:12px 0}
+.ex{background:var(--tint,var(--soft));border:1.5px dashed var(--strong,var(--accent))}
+.tip{background:var(--tip-bg);color:var(--tip)} .warn{background:var(--bad-bg);color:var(--bad)}
+.tip b,.warn b{background:none;padding:0}
+.q{padding:16px 0;border-top:1px solid var(--line)} .q:first-of-type{border-top:0}
+.q>p{margin:0 0 8px;font-weight:700}
+.tag{font-size:12.5px;font-weight:700;color:var(--strong);text-transform:uppercase;letter-spacing:.04em}
+.opts{display:grid;gap:8px} .opt{text-align:left;width:100%}
+.opt.sel{border-color:var(--accent);background:var(--soft);font-weight:700}
+.opt.right{background:var(--good-bg);border-color:var(--good);color:var(--good);font-weight:700}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.fields{display:flex;flex-wrap:wrap;gap:10px 18px;margin:8px 0 10px}
+.fields label{display:flex;align-items:center;gap:6px;font-weight:700}
+input{font:inherit;width:8.5em;padding:8px 10px;border:1.5px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink)}
+input.ok{border-color:var(--good);background:var(--good-bg)} input.no{border-color:var(--bad);background:var(--bad-bg)}
+.fb{margin-top:8px;padding:10px 12px;border-radius:10px;font-size:15.5px}
+.fb.good{background:var(--good-bg);color:var(--good)} .fb.bad{background:var(--bad-bg);color:var(--bad)} .fb.hint{background:var(--tip-bg);color:var(--tip)}
+.steps{margin-top:8px;padding:10px 12px;border-radius:10px;background:var(--soft);font-size:15.5px}
+.big{font-family:var(--display);font-weight:800;font-size:44px;line-height:1}
+.muted{color:var(--muted);font-size:15px}
+table.plain{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+table.plain td,table.plain th{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left}
+.note{background:var(--tip-bg);color:var(--tip);border-radius:12px;padding:10px 14px}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .3s}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Aula de Ciencias de Ale</h1>
+  <p>8.º año · Examen del martes 17 de noviembre · Estudia, resuelve y refuerza</p>
+  <span id="sync">Conectando…</span>
+</header>
+<nav id="nav">
+  <button data-view="inicio">Temas</button>
+  <button data-view="practica">Practicar</button>
+  <button data-view="errores">Mis errores</button>
+  <button data-view="simulacro">Simulacro</button>
+  <button data-view="progreso">Progreso y familia</button>
+</nav>
+<main id="main"></main>
+</div>
+<script>
+const TOPICS=[
+{t:"Medir, estimar y magnitudes",s:"Qué es medir, instrumentos, magnitudes fundamentales y derivadas.",h:`
+<p><b>Medir</b> es comparar algo con una <b>unidad</b> usando un instrumento. Si una mesa mide 2 m, el metro cabe 2 veces. <b>Estimar</b> es calcularlo «al ojo»: un valor aproximado sin medir.</p>
+<p>Toda medida tiene <b>número y unidad</b>. Una <b>magnitud física</b> es todo lo que se puede medir: longitud, masa, tiempo, temperatura.</p>
+<div class="tip">Ninguna medida es perfecta. Siempre hay un pequeño error por el instrumento o por quien mide.</div>
+<h3>Instrumentos</h3>
+<p>Regla o cinta: longitud · Balanza: masa · Cronómetro: tiempo · Termómetro: temperatura · Probeta: volumen · Dinamómetro: fuerza o peso.</p>
+<h3>Fundamentales y derivadas</h3>
+<div class="scroll"><table><tr><th>Fundamentales (básicas)</th><th>Derivadas</th></tr>
+<tr><td>Son independientes entre sí.<br>Tienen unidad propia.<br>Son pocas: 7.<br>Sirven para construir las derivadas.</td><td>Se definen a partir de las fundamentales.<br>Sus unidades combinan otras (m/s).<br>Son numerosas.<br>Describen fenómenos físicos.</td></tr></table></div>
+<h3>Las 7 fundamentales</h3>
+<div class="scroll"><table><tr><th>Magnitud</th><th>Unidad</th><th>Símbolo</th></tr>
+<tr><td>Longitud</td><td>metro</td><td>m</td></tr><tr><td>Masa</td><td>kilogramo</td><td>kg</td></tr><tr><td>Tiempo</td><td>segundo</td><td>s</td></tr>
+<tr><td>Corriente eléctrica</td><td>ampere</td><td>A</td></tr><tr><td>Temperatura</td><td>kelvin</td><td>K</td></tr>
+<tr><td>Cantidad de sustancia</td><td>mol</td><td>mol</td></tr><tr><td>Intensidad luminosa</td><td>candela</td><td>cd</td></tr></table></div>
+<p><b>Derivadas más usadas:</b> área (m²), volumen (m³), velocidad (m/s), aceleración (m/s²), densidad (kg/m³), fuerza (N), energía (J), presión (Pa), potencia (W).</p>
+<div class="warn">Los símbolos respetan mayúsculas y minúsculas, no llevan punto ni plural: <b>km</b>, <b>kg</b>, <b>K</b> (sin °).</div>`},
+{t:"Cifras significativas",s:"Cómo contarlas, redondear y operar con ellas.",h:`
+<p>Son los dígitos de una medida que conocemos con confianza. Más cifras significativas = medida más precisa.</p>
+<h3>Reglas para contar</h3>
+<div class="scroll"><table><tr><th>Caso</th><th>¿Cuenta?</th><th>Ejemplo</th></tr>
+<tr><td>Dígitos distintos de cero</td><td>Sí</td><td>4567 → 4</td></tr>
+<tr><td>Ceros entre dígitos</td><td>Sí</td><td>205 → 3</td></tr>
+<tr><td>Ceros al final, con coma</td><td>Sí</td><td>0,500 → 3</td></tr>
+<tr><td>Ceros al principio</td><td>No</td><td>0,0025 → 2</td></tr>
+<tr><td>Ceros al final, sin coma</td><td>No</td><td>1000 → 1</td></tr></table></div>
+<div class="tip"><b>Truco:</b> empieza a contar en el primer dígito que no sea cero. Cuenta todo hasta el final. Si el número no tiene coma, no cuentes los ceros del final.</div>
+<h3>Redondear</h3>
+<p>Mira el primer dígito que vas a quitar. Si es <b>4 o menos</b>, el anterior no cambia: 74,693 → 74,69. Si es <b>5 o más</b>, el anterior sube uno: 1,026868 → 1,027.</p>
+<h3>Operaciones</h3>
+<p><b>Suma y resta:</b> el resultado lleva los decimales del dato con <b>menos decimales</b>.</p>
+<div class="ex">12,52 + 3,1 = 15,62 → <b>15,6</b> (3,1 tiene un decimal)</div>
+<p><b>Multiplicación y división:</b> el resultado lleva las cifras significativas del dato que tenga <b>menos</b>.</p>
+<div class="ex">2,5 × 3,47 = 8,675 → <b>8,7</b> (2,5 tiene dos cifras)</div>`},
+{t:"Notación científica",s:"Los 3 casos de ida, los 3 de vuelta y las cuatro operaciones.",h:`
+<div class="ex"><b>M × 10ⁿ</b>, con M entre 1 y 10 (una sola cifra antes de la coma). A <b>n</b> en clase se le llama «la magnitud» y al 10 «la base».</div>
+<p><b>Sirve para:</b> facilitar cálculos con números extremos, entender mejor las relaciones entre números y ahorrar espacio y tiempo.</p>
+<h3>De decimal a notación científica</h3>
+<div class="scroll"><table><tr><th></th><th>Caso 1</th><th>Caso 2</th><th>Caso 3</th></tr>
+<tr><td>Cuándo</td><td>Número igual o mayor que 10</td><td>Número menor que 1</td><td>Entre 1 y 10, y el cero</td></tr>
+<tr><td>La coma</td><td>A la izquierda</td><td>A la derecha</td><td>No se mueve</td></tr>
+<tr><td>n</td><td>Positiva</td><td>Negativa</td><td>Cero</td></tr>
+<tr><td>Ejemplo</td><td>34 621 = 3,4621 × 10⁴</td><td>0,00304 = 3,04 × 10⁻³</td><td>3,47 = 3,47 × 10⁰</td></tr></table></div>
+<p>El signo del número se ignora y se pone al final: −2,45 = −2,45 × 10⁰.</p>
+<h3>De notación científica a decimal</h3>
+<p>n <b>positiva</b>: coma a la derecha → 9,97 × 10⁴ = 99 700.<br>n <b>negativa</b>: coma a la izquierda → 9,97 × 10⁻⁴ = 0,000997.<br>n <b>cero</b>: solo se quita la base → 9,97 × 10⁰ = 9,97.</p>
+<h3>Multiplicar</h3>
+<p>Multiplica los números, <b>suma</b> las magnitudes y ajusta.</p>
+<div class="ex">(3,6 × 10⁵)(4,0 × 10³) = 14,4 × 10⁸ = <b>1,44 × 10⁹</b></div>
+<h3>Dividir</h3>
+<p>Divide los números, <b>resta</b> las magnitudes y ajusta.</p>
+<div class="ex">(2,4 × 10⁶) ÷ (4,0 × 10⁰) = 0,6 × 10⁶ = <b>6,0 × 10⁵</b></div>
+<h3>Sumar y restar</h3>
+<p>1. Iguala las potencias de 10. 2. Suma o resta los números. 3. Conserva la base y la magnitud. 4. Ajusta.</p>
+<div class="ex">(3,2 × 10⁴) + (5,0 × 10³) → 5,0 × 10³ = 0,50 × 10⁴ → (3,2 + 0,50) × 10⁴ = <b>3,7 × 10⁴</b></div>
+<div class="warn">Al ajustar: coma a la izquierda, la magnitud <b>sube</b>. Coma a la derecha, <b>baja</b>. En la suma las magnitudes no se suman.</div>
+<div class="tip">En la calculadora usa la tecla <b>×10ˣ</b> (o EXP). La profe pide resultados con 3 cifras: 4,67 × 10⁰ m/s.</div>`},
+{t:"Prefijos del SI",s:"Múltiplos, submúltiplos y cómo pasar de uno a otro.",h:`
+<p>Un prefijo multiplica la unidad por una potencia de 10. Sirve con cualquier unidad: kilómetro, kilogramo.</p>
+<div class="scroll"><table><tr><th>Prefijo</th><th>Símbolo</th><th>Factor</th><th>Prefijo</th><th>Símbolo</th><th>Factor</th></tr>
+<tr><td>giga</td><td>G</td><td>10⁹</td><td>deci</td><td>d</td><td>10⁻¹</td></tr>
+<tr><td>mega</td><td>M</td><td>10⁶</td><td>centi</td><td>c</td><td>10⁻²</td></tr>
+<tr><td>kilo</td><td>k</td><td>10³</td><td>mili</td><td>m</td><td>10⁻³</td></tr>
+<tr><td>hecto</td><td>h</td><td>10²</td><td>micro</td><td>µ</td><td>10⁻⁶</td></tr>
+<tr><td>deca</td><td>da</td><td>10¹</td><td>nano</td><td>n</td><td>10⁻⁹</td></tr></table></div>
+<p>Más arriba: tera (T, 10¹²), peta, exa, zetta, yotta (10²⁴). Más abajo: pico (p, 10⁻¹²), femto, atto, zepto, yocto (10⁻²⁴). Van en saltos de 3 en 3.</p>
+<h3>La regla</h3>
+<div class="ex">valor × 10 elevado a (potencia que tengo − potencia a la que voy)</div>
+<p>5 km a mm: 3 − (−3) = 6 → <b>5 × 10⁶ mm</b>.<br>3 µs a ms: −6 − (−3) = −3 → <b>3 × 10⁻³ ms</b>.<br>Sin prefijo (m, g, L) la potencia es 0: 450 mg a g → 450 × 10⁻³ g = 0,45 g.</p>
+<div class="tip">Revisa con lógica: si vas a una unidad más pequeña, el número sale más grande.</div>`},
+{t:"Conversiones",s:"Factores de conversión y los 5 pasos de la profe.",h:`
+<p>Un <b>factor de conversión</b> es una fracción que vale 1: arriba y abajo hay lo mismo en unidades distintas (1000 m / 1 km).</p>
+<h3>Los 5 pasos</h3>
+<p>1. Saber los factores o los prefijos.<br>2. La unidad de arriba se cancela con la de abajo.<br>3. La de abajo se cancela con la de arriba.<br>4. Se escriben los valores del factor.<br>5. Lo de arriba multiplica y lo de abajo divide.</p>
+<div class="ex">5,20 km × (1000 m / 1 km) = <b>5200 m</b><br>72 km/h × (1000 m / 1 km) × (1 h / 3600 s) = <b>20 m/s</b></div>
+<h3>Factores que hay que saber</h3>
+<p>1 km = 1000 m · 1 m = 100 cm · 1 pie = 0,3048 m · 1 milla = 1609 m<br>1 kg = 1000 g · 1 kg = 2,2 lb · 1 tonelada = 1000 kg<br>1 h = 3600 s · 1 día = 24 h · 1 año = 365 días<br>1 L = 1000 mL · 1 mL = 1 cm³ · 1 galón = 3,785 L · 1 hectárea = 10⁴ m²</p>
+<div class="tip"><b>Atajo:</b> de km/h a m/s divide entre 3,6. De m/s a km/h multiplica por 3,6.</div>
+<div class="warn">Unidades cuadradas o cúbicas: el factor se eleva. 1 m² = 100 cm × 100 cm = <b>10 000 cm²</b>, no 100.</div>`},
+{t:"Temperatura",s:"Celsius, Fahrenheit y kelvin. Las fórmulas las dan en el examen.",h:`
+<div class="ex">°F = 1,8 × °C + 32<br>°C = (°F − 32) ÷ 1,8<br>K = °C + 273,15<br>°C = K − 273,15</div>
+<p><b>35 °C a °F:</b> 1,8 × 35 + 32 = <b>95 °F</b>.<br><b>300 K a °C:</b> 300 − 273,15 = <b>26,85 °C</b>.</p>
+<h3>De °F a K: en dos pasos</h3>
+<p>Primero a Celsius y después a kelvin. 50 °F → (50 − 32) ÷ 1,8 = 10 °C → 10 + 273,15 = <b>283,15 K</b>.</p>
+<div class="warn">En el cuaderno, la fórmula de °F a K quedó sin el «+ 273,15». No lo olvides.</div>
+<div class="tip">De °F a °C <b>primero restas 32</b> y luego divides. El kelvin no lleva ° y nunca es negativo. El agua se congela a 0 °C = 32 °F = 273,15 K.</div>`},
+{t:"Escalares y vectores",s:"Qué cantidades tienen dirección y cómo trabajar un vector.",h:`
+<p><b>Escalar:</b> solo número y unidad. Masa, tiempo, temperatura, distancia, rapidez.</p>
+<p><b>Vectorial:</b> magnitud y dirección. Desplazamiento, velocidad, fuerza, peso, aceleración.</p>
+<div class="tip">Pregúntate: ¿importa hacia dónde? Si sí, es vectorial.</div>
+<h3>Tipos de vectores</h3>
+<p><b>Consecutivos:</b> uno empieza donde termina el otro. <b>Concurrentes:</b> salen de un mismo punto. <b>Opuestos:</b> misma magnitud, dirección contraria.</p>
+<h3>Componentes y magnitud</h3>
+<div class="ex">Rx = R × cos θ &nbsp;·&nbsp; Ry = R × sen θ<br>R = √(Rx² + Ry²) &nbsp;·&nbsp; θ = tan⁻¹(Ry ÷ Rx)</div>
+<p>Ejemplo: Rx = −6 m, Ry = 8 m. R = √(36 + 64) = <b>10 m</b>. Ángulo de referencia: tan⁻¹(8 ÷ 6) = 53,13°.</p>
+<h3>Ajuste por cuadrante</h3>
+<p>I (+,+): θ · II (−,+): 180° − θ · III (−,−): 180° + θ · IV (+,−): 360° − θ.<br>El ejemplo está en el cuadrante II: 180° − 53,13° = <b>126,87°</b>.</p>`},
+{t:"MRU",s:"Distancia, desplazamiento, rapidez, velocidad y tiempo.",h:`
+<p>El <b>Movimiento Rectilíneo Uniforme</b> va en línea recta y siempre a la misma velocidad.</p>
+<p><b>Características:</b> trayectoria recta · velocidad constante · aceleración cero · distancias iguales en tiempos iguales.</p>
+<div class="scroll"><table><tr><th>Concepto</th><th>Qué es</th></tr>
+<tr><td>Marco de referencia</td><td>Punto desde donde se describe el movimiento</td></tr>
+<tr><td>Trayectoria</td><td>El camino que sigue el cuerpo</td></tr>
+<tr><td>Distancia</td><td>Todo el camino recorrido. Escalar</td></tr>
+<tr><td>Desplazamiento</td><td>Línea recta del inicio al final, con dirección. Vectorial</td></tr>
+<tr><td>Rapidez media</td><td>Distancia ÷ tiempo. Escalar</td></tr>
+<tr><td>Velocidad media</td><td>Desplazamiento ÷ tiempo. Vectorial</td></tr></table></div>
+<div class="ex">v = x ÷ t &nbsp;·&nbsp; x = v × t &nbsp;·&nbsp; t = x ÷ v</div>
+<div class="tip">Si caminas 40 m al este y regresas 30 m: la distancia es 70 m, pero el desplazamiento es 10 m al este.</div>
+<h3>Problema del folleto</h3>
+<p>Un niño corre 120 m al este y 90 m al norte en 45 s.<br>Distancia: 120 + 90 = <b>210 m</b>.<br>Desplazamiento: √(120² + 90²) = <b>150 m</b>, a 36,87° al norte del este.<br>Rapidez: 210 ÷ 45 = <b>4,67 m/s</b>.<br>Velocidad: 150 ÷ 45 = <b>3,33 m/s</b>, con esa dirección.</p>
+<h3>La luz del Sol</h3>
+<p>t = x ÷ v = (1,5 × 10¹¹ m) ÷ (3 × 10⁸ m/s) = 0,5 × 10³ = <b>5,00 × 10² s</b>.</p>`},
+{t:"Despejar fórmulas",s:"El método de la pirámide y los pasos para resolver.",h:`
+<p>Pon la fórmula en un triángulo: arriba va la variable que resulta de multiplicar las dos de abajo. <b>Tapa</b> la que buscas:</p>
+<p>Si las otras dos están lado a lado, se <b>multiplican</b>. Si una está arriba y la otra abajo, se <b>dividen</b>.</p>
+<div class="scroll"><table><tr><th>Arriba / abajo</th><th>Fórmulas</th></tr>
+<tr><td>x / v · t</td><td>v = x ÷ t · t = x ÷ v · x = v × t</td></tr>
+<tr><td>F / m · a</td><td>F = m × a · m = F ÷ a · a = F ÷ m</td></tr>
+<tr><td>m / ρ · V</td><td>ρ = m ÷ V · m = ρ × V · V = m ÷ ρ</td></tr>
+<tr><td>w / m · g</td><td>w = m × g · m = w ÷ g</td></tr>
+<tr><td>F / P · A</td><td>P = F ÷ A · F = P × A · A = F ÷ P</td></tr></table></div>
+<h3>Pasos que pide la profe</h3>
+<p>1. Datos con unidades. 2. Fórmula. 3. Despeje. 4. Sustitución con unidades. 5. Resultado con unidad.</p>
+<div class="warn">Antes de sustituir, revisa que las unidades combinen. Si la rapidez está en m/s y la distancia en km, convierte primero.</div>
+<div class="ex">Tren: 3,6 km a 20 m/s. 3,6 km = 3600 m → t = 3600 m ÷ 20 m/s = <b>180 s</b>.</div>`}
+];
+
+const Q=[
+[0,"¿Cuál instrumento mide la masa?",["Termómetro","Balanza","Cronómetro","Probeta"],1,"La balanza mide la masa."],
+[0,"¿Cuál es una magnitud derivada?",["Masa","Tiempo","Velocidad","Temperatura"],2,"La velocidad combina longitud y tiempo (m/s)."],
+[0,"¿Cuántas magnitudes fundamentales tiene el SI?",["5","7","9","12"],1,"Son 7: longitud, masa, tiempo, corriente, temperatura, cantidad de sustancia e intensidad luminosa."],
+[0,"La unidad de temperatura en el SI es:",["grado Celsius","grado Fahrenheit","kelvin","joule"],2,"El kelvin (K) es la unidad fundamental de temperatura."],
+[0,"Estimar es:",["Comparar con una unidad usando un instrumento","Dar un valor aproximado sin medir exactamente","Convertir unidades","Redondear un número"],1,"Estimar es calcular «al ojo», sin instrumento."],
+[0,"Una característica de las magnitudes fundamentales:",["Se definen a partir de otras","Son numerosas","Son independientes entre sí","Combinan varias unidades"],2,"No se definen a partir de ninguna otra magnitud."],
+[0,"La unidad de la densidad es:",["kg/s³","kg/m³","m/s²","N/m²"],1,"Densidad = masa ÷ volumen = kg/m³. En el folleto dice «segundo», pero es metro."],
+[0,"¿Cuál símbolo está bien escrito?",["5 Km","5 kms","5 km","5 km."],2,"Kilo va con k minúscula, sin plural y sin punto."],
+[1,"¿Cuántas cifras significativas tiene 0,00450?",["2","3","5","6"],1,"Los ceros del principio no cuentan. El 4, el 5 y el cero final sí."],
+[1,"¿Cuántas cifras significativas tiene 1000?",["1","2","3","4"],0,"No tiene coma, así que los ceros del final no cuentan."],
+[1,"¿Cuántas cifras significativas tiene 205?",["1","2","3","4"],2,"El cero está entre dígitos distintos de cero: cuenta."],
+[1,"¿Cuántas cifras significativas tiene 25,160?",["3","4","5","6"],2,"Con coma, el cero final cuenta: 2, 5, 1, 6, 0."],
+[1,"Redondea 4,6789 a 3 cifras significativas:",["4,67","4,68","4,70","4,679"],1,"El primer dígito que se quita es 8 (5 o más): el 7 sube a 8."],
+[1,"12,52 + 3,1 con cifras significativas correctas:",["15,62","15,6","16","15,620"],1,"En la suma mandan los decimales: 3,1 tiene uno."],
+[1,"2,5 × 3,47 con cifras significativas correctas:",["8,675","8,68","8,7","9"],2,"En la multiplicación manda el dato con menos cifras: 2,5 tiene dos."],
+[1,"Redondea 1,996 a 3 cifras significativas:",["1,99","2,0","2,00","1,90"],2,"Se quita el 6, así que 1,99 sube a 2,00. Los ceros muestran las 3 cifras."],
+[2,"0,0072 en notación científica:",["7,2 × 10³","7,2 × 10⁻³","72 × 10⁻⁴","0,72 × 10⁻²"],1,"Caso 2: la coma va 3 lugares a la derecha, n = −3."],
+[2,"34 621 en notación científica:",["3,4621 × 10⁴","34,621 × 10³","3,4621 × 10⁻⁴","3,4621 × 10⁵"],0,"Caso 1: la coma va 4 lugares a la izquierda."],
+[2,"¿Con cuál caso se escribe 6,5?",["Caso 1","Caso 2","Caso 3","No se puede"],2,"Está entre 1 y 10: la coma no se mueve. 6,5 × 10⁰."],
+[2,"9,97 × 10⁻⁴ en decimal:",["99 700","0,000997","0,00997","9970"],1,"Magnitud negativa: la coma va 4 lugares a la izquierda."],
+[2,"(3,6 × 10⁵)(4,0 × 10³) =",["14,4 × 10⁸","1,44 × 10⁹","1,44 × 10⁸","1,44 × 10¹⁵"],1,"3,6 × 4,0 = 14,4 y 5 + 3 = 8. Se ajusta: 1,44 × 10⁹."],
+[2,"(2,4 × 10⁶) ÷ (4,0 × 10⁰) =",["0,6 × 10⁶","6,0 × 10⁶","6,0 × 10⁵","6,0 × 10⁷"],2,"0,6 × 10⁶ se ajusta: coma a la derecha, la magnitud baja. 6,0 × 10⁵."],
+[2,"(3,2 × 10⁴) + (5,0 × 10³) =",["8,2 × 10⁷","3,7 × 10⁴","8,2 × 10⁴","3,7 × 10³"],1,"5,0 × 10³ = 0,50 × 10⁴. Luego 3,2 + 0,50 = 3,7."],
+[2,"Para sumar en notación científica, primero:",["Se suman las magnitudes","Se multiplican los números","Se igualan las potencias de 10","Se restan las magnitudes"],2,"Las dos cantidades deben tener la misma potencia de 10."],
+[2,"(9,0 × 10⁻³) ÷ (3,0 × 10¹) =",["3,0 × 10⁻²","3,0 × 10⁻⁴","3,0 × 10⁴","6,0 × 10⁻⁴"],1,"9 ÷ 3 = 3 y −3 − 1 = −4."],
+[2,"¿Cuál está bien escrito en notación científica?",["25 × 10⁴","0,7 × 10³","3,8 × 10⁻⁵","10 × 10²"],2,"M debe estar entre 1 y 10."],
+[3,"¿Qué potencia corresponde a kilo?",["10⁻³","10²","10³","10⁶"],2,"Kilo (k) = 10³ = 1000."],
+[3,"¿Qué potencia corresponde a micro (µ)?",["10⁻³","10⁻⁶","10⁻⁹","10⁶"],1,"Micro = 10⁻⁶."],
+[3,"5 km a mm:",["5 × 10³ mm","5 × 10⁻⁶ mm","5 × 10⁶ mm","5 × 10⁵ mm"],2,"3 − (−3) = 6."],
+[3,"El símbolo de mega es:",["m","M","mg","Mg"],1,"M mayúscula. La m minúscula es mili."],
+[3,"450 mg a g:",["0,45 g","4,5 g","45 g","450 000 g"],0,"450 × 10⁻³ g = 0,45 g."],
+[3,"¿Qué potencia corresponde a nano?",["10⁻⁶","10⁻⁹","10⁻¹²","10⁹"],1,"Nano (n) = 10⁻⁹."],
+[3,"3 µs a ms:",["3 × 10³ ms","3 × 10⁻³ ms","3 × 10⁻⁹ ms","3 × 10⁹ ms"],1,"−6 − (−3) = −3."],
+[4,"¿Cuántos segundos hay en 2 horas?",["120","720","3600","7200"],3,"2 × 3600 = 7200 s."],
+[4,"72 km/h en m/s:",["20 m/s","259,2 m/s","7,2 m/s","12 m/s"],0,"72 ÷ 3,6 = 20 m/s."],
+[4,"5 pies en metros (1 pie = 0,3048 m):",["16,4 m","1,524 m","0,061 m","15,24 m"],1,"5 × 0,3048 = 1,524 m."],
+[4,"1 m² equivale a:",["100 cm²","1000 cm²","10 000 cm²","1 000 000 cm²"],2,"100 cm × 100 cm = 10 000 cm²."],
+[4,"150 lb en kg (1 kg = 2,2 lb):",["330 kg","68,2 kg","152,2 kg","6,82 kg"],1,"La libra va abajo para cancelarse: 150 ÷ 2,2 = 68,2 kg."],
+[4,"20 galones en litros (1 galón = 3,785 L):",["5,28 L","75,7 L","23,8 L","757 L"],1,"20 × 3,785 = 75,7 L."],
+[4,"3 millas en metros (1 milla = 1609 m):",["536 m","4827 m","1612 m","48 270 m"],1,"3 × 1609 = 4827 m."],
+[5,"¿Cuál fórmula convierte °C a °F?",["°F = °C + 273,15","°F = 1,8 × °C + 32","°F = (°C − 32) ÷ 1,8","°F = °C − 273,15"],1,"Se multiplica por 1,8 y se suma 32."],
+[5,"35 °C en °F:",["95 °F","63 °F","308,15 °F","51,4 °F"],0,"1,8 × 35 + 32 = 95."],
+[5,"300 K en °C:",["573,15 °C","26,85 °C","27,15 °C","−26,85 °C"],1,"300 − 273,15 = 26,85."],
+[5,"212 °F en °C:",["100 °C","180 °C","117,8 °C","413,6 °C"],0,"(212 − 32) ÷ 1,8 = 100."],
+[5,"77 °F en K:",["25 K","350,15 K","298,15 K","248,15 K"],2,"(77 − 32) ÷ 1,8 = 25 °C. Luego 25 + 273,15."],
+[5,"¿Cuál temperatura está mal escrita?",["25 °C","77 °F","300 °K","300 K"],2,"El kelvin no lleva el símbolo de grado."],
+[5,"0 °C en kelvin:",["0 K","32 K","273,15 K","−273,15 K"],2,"0 + 273,15."],
+[6,"¿Cuál cantidad es vectorial?",["Masa","Rapidez","Tiempo","Desplazamiento"],3,"El desplazamiento tiene magnitud y dirección."],
+[6,"¿Cuál cantidad es escalar?",["Velocidad","Fuerza","Rapidez","Aceleración"],2,"La rapidez solo tiene número y unidad."],
+[6,"El peso es una cantidad:",["Escalar, porque es masa","Vectorial, porque es una fuerza","Fundamental","Sin unidad"],1,"El peso es una fuerza que apunta hacia abajo."],
+[6,"Componente Rx de un vector de 50 m a 30°:",["25,0 m","43,3 m","50,0 m","28,9 m"],1,"Rx = 50 × cos 30° = 43,3 m."],
+[6,"Si Rx = 30 m y Ry = 40 m, la magnitud es:",["70 m","35 m","50 m","10 m"],2,"√(900 + 1600) = √2500 = 50 m."],
+[6,"Un vector con Rx = −6 y Ry = 8 está en el cuadrante:",["I","II","III","IV"],1,"x negativo, y positivo: cuadrante II."],
+[6,"Dos vectores opuestos tienen:",["Distinta magnitud y misma dirección","Misma magnitud y dirección contraria","El mismo punto de origen","Ángulo de 90°"],1,"Misma magnitud, dirección opuesta."],
+[7,"En el MRU, el objeto:",["Cambia su velocidad","Recorre distancias iguales en tiempos iguales","Está detenido","Se mueve en curva"],1,"Es la característica principal del MRU."],
+[7,"Un atleta recorre 400 m en 50 s. Su rapidez es:",["8 m/s","0,125 m/s","20 000 m/s","450 m/s"],0,"v = 400 ÷ 50 = 8 m/s."],
+[7,"Un carro va a 25 m/s durante 40 s. Recorre:",["0,625 m","65 m","1000 m","1,6 m"],2,"x = 25 × 40 = 1000 m."],
+[7,"¿Cuánto tarda un corredor a 15 m/s en recorrer 450 m?",["30 s","6750 s","0,033 s","435 s"],0,"t = 450 ÷ 15 = 30 s."],
+[7,"Caminas 40 m al este y regresas 30 m al oeste. El desplazamiento es:",["70 m","10 m al este","10 m al oeste","50 m"],1,"Van en sentidos contrarios: se restan."],
+[7,"Corres 120 m al este y 90 m al norte. El desplazamiento mide:",["210 m","150 m","30 m","105 m"],1,"Pitágoras: √(120² + 90²) = 150 m. Los 210 m son la distancia."],
+[7,"En el MRU la aceleración es:",["Constante y positiva","Igual a cero","Igual a la velocidad","Negativa"],1,"La velocidad no cambia."],
+[7,"La luz (3 × 10⁸ m/s) recorre 1,5 × 10¹¹ m en:",["2,00 × 10¹⁹ s","5,00 × 10² s","4,5 × 10¹⁹ s","5,00 × 10³ s"],1,"t = x ÷ v: 1,5 ÷ 3 = 0,5 y 11 − 8 = 3. Ajustado: 5,00 × 10² s."],
+[7,"La velocidad media se calcula con:",["La distancia total","El desplazamiento","La trayectoria","La aceleración"],1,"Velocidad = desplazamiento ÷ tiempo. Con la distancia sale la rapidez."],
+[7,"El punto desde donde se describe un movimiento es:",["La trayectoria","El marco de referencia","El desplazamiento","La distancia"],1,"Es el marco de referencia."],
+[8,"Si F = m × a, la aceleración es:",["a = F × m","a = m ÷ F","a = F ÷ m","a = F + m"],2,"Se divide la fuerza entre la masa."],
+[8,"Si v = x ÷ t, el tiempo es:",["t = x × v","t = x ÷ v","t = v ÷ x","t = x − v"],1,"Tapa la t: queda x arriba y v abajo."],
+[8,"Densidad 2,7 g/cm³ y volumen 10 cm³. La masa es:",["0,27 g","3,7 g","27 g","12,7 g"],2,"m = ρ × V = 27 g."],
+[8,"¿Cuánto pesa una persona de 60 kg? (g = 9,8 m/s²)",["6,12 N","69,8 N","588 N","60 N"],2,"w = m × g = 588 N."],
+[8,"Una fuerza de 100 N sobre 2 m² produce una presión de:",["200 Pa","50 Pa","102 Pa","0,02 Pa"],1,"P = F ÷ A = 50 Pa."],
+[8,"Un tren recorre 3,6 km a 20 m/s. ¿Cuánto tarda?",["0,18 s","72 s","180 s","5,6 s"],2,"Primero 3,6 km = 3600 m. Luego 3600 ÷ 20 = 180 s."],
+[8,"En la pirámide, si las dos variables quedan lado a lado abajo:",["Se dividen","Se multiplican","Se suman","Se restan"],1,"Lado a lado: se multiplican."]
+].map(([t,q,o,a,e],i)=>({i,t,q,o,a,e}));
+
+const HUES=[205,265,330,18,42,150,178,228,295];
+const KEYS=[
+[["Medir","Comparar con una unidad usando un instrumento."],["Estimar","Calcular «al ojo», sin instrumento."],["Fundamentales","Son 7 y no dependen de otras."],["Derivadas","Combinan fundamentales: m/s, kg/m³."]],
+[["Dónde empiezo a contar","En el primer dígito que no es cero."],["Ceros al final","Cuentan solo si el número tiene coma."],["Suma y resta","Mandan los decimales del dato con menos decimales."],["Multiplicar y dividir","Mandan las cifras del dato con menos cifras."]],
+[["Formato","M × 10ⁿ, con una sola cifra antes de la coma."],["Número grande","Coma a la izquierda, n positiva."],["Número pequeño","Coma a la derecha, n negativa."],["× suma · ÷ resta","En + y − primero se igualan las potencias."]],
+[["Regla única","Potencia que tengo − potencia a la que voy."],["Sin prefijo","La potencia es 0."],["Revisa","Unidad más pequeña = número más grande."]],
+[["Factor","Fracción que vale 1."],["Cancelar","La unidad que quiero quitar va al lado opuesto."],["Arriba multiplica","Abajo divide."],["km/h ↔ m/s","Divide o multiplica por 3,6."]],
+[["°C → °F","Multiplico por 1,8 y sumo 32."],["°F → °C","Primero resto 32, después divido entre 1,8."],["°C ↔ K","Sumo o resto 273,15."],["°F → K","Dos pasos: a °C y luego a K."]],
+[["Escalar","Solo número y unidad."],["Vectorial","Número, unidad y dirección."],["Magnitud","R = √(Rx² + Ry²)."],["Ángulo","tan⁻¹ y ajuste según el cuadrante."]],
+[["Distancia","Todo el camino. Se suma."],["Desplazamiento","Línea recta de inicio a fin, con dirección."],["Rapidez","Distancia ÷ tiempo."],["Velocidad","Desplazamiento ÷ tiempo."]],
+[["Pirámide","Tapa lo que buscas."],["Lado a lado","Se multiplican."],["Arriba y abajo","Se dividen."],["5 pasos","Datos, fórmula, despeje, sustitución, resultado."]]
+];
+// Ejercicios para resolver: [tema, enunciado, campos [etiqueta, respuesta, tolerancia, unidad], pista, pasos]
+const E=[
+[0,"De esta lista, ¿cuántas son magnitudes <b>fundamentales</b>? masa · velocidad · tiempo · densidad · temperatura · área · longitud",[["Cantidad",4,0,""]],"Las fundamentales son las 7 de la tabla.","Masa, tiempo, temperatura y longitud: <b>4</b>. Velocidad, densidad y área son derivadas."],
+[0,"¿Cuántas son magnitudes <b>derivadas</b>? fuerza · tiempo · presión · volumen · intensidad luminosa · aceleración",[["Cantidad",4,0,""]],"Las derivadas combinan varias unidades.","Fuerza, presión, volumen y aceleración: <b>4</b>."],
+[0,"Mides un lápiz tres veces: 14,2 cm, 14,4 cm y 14,3 cm. ¿Cuál es el promedio?",[["Promedio",14.3,0,"cm"]],"Suma las tres y divide entre 3.","(14,2 + 14,4 + 14,3) ÷ 3 = 42,9 ÷ 3 = <b>14,3 cm</b>."],
+[0,"Un objeto tiene 300 g de masa y 150 cm³ de volumen. Calcula su densidad.",[["Densidad",2,0,"g/cm³"]],"Densidad = masa ÷ volumen.","300 g ÷ 150 cm³ = <b>2 g/cm³</b>."],
+[1,"¿Cuántas cifras significativas tiene 0,05080?",[["Cifras",4,0,""]],"Los ceros del principio no cuentan.","Cuentan 5, 0, 8 y el 0 final (hay coma): <b>4</b>."],
+[1,"¿Cuántas cifras significativas tiene 3,40 × 10³?",[["Cifras",3,0,""]],"En notación científica cuentan todas las de M.","3, 4 y 0: <b>3</b>."],
+[1,"Redondea 0,012349 a 3 cifras significativas.",[["Resultado",0.0123,0,""]],"Empieza a contar en el 1.","Me quedo con 1, 2, 3. El que quito es 4: no sube. <b>0,0123</b>."],
+[1,"45,678 − 2,3 con las cifras significativas correctas.",[["Resultado",43.4,0,""]],"En la resta mandan los decimales.","43,378 → 2,3 tiene un decimal → <b>43,4</b>."],
+[1,"9,876 ÷ 3,2 con las cifras significativas correctas.",[["Resultado",3.1,0,""]],"En la división manda el que tiene menos cifras.","3,08625 → 3,2 tiene 2 cifras → <b>3,1</b>."],
+[1,"0,0045 × 120,0 con las cifras significativas correctas.",[["Resultado",0.54,0,""]],"0,0045 tiene 2 cifras significativas.","0,54 → 2 cifras: <b>0,54</b>."],
+[1,"7,0 + 0,456 + 12 con las cifras significativas correctas.",[["Resultado",19,0,""]],"12 no tiene decimales.","19,456 → sin decimales → <b>19</b>."],
+[2,"Escribe 58 000 en notación científica.",[["M",5.8,0,"× 10 a la"],["n",4,0,""]],"Caso 1: la coma va a la izquierda.","La coma se mueve 4 lugares: <b>5,8 × 10⁴</b>."],
+[2,"Escribe 0,00072 en notación científica.",[["M",7.2,0,"× 10 a la"],["n",-4,0,""]],"Caso 2: la coma va a la derecha.","La coma se mueve 4 lugares a la derecha: <b>7,2 × 10⁻⁴</b>."],
+[2,"Escribe 7,02 × 10⁻² en decimal.",[["Decimal",0.0702,0,""]],"Magnitud negativa: coma a la izquierda.","Dos lugares a la izquierda: <b>0,0702</b>."],
+[2,"(2,5 × 10³) · (4,0 × 10⁴)",[["M",1,0,"× 10 a la"],["n",8,0,""]],"Multiplica los números y suma las magnitudes. Luego ajusta.","2,5 × 4,0 = 10 y 3 + 4 = 7 → 10 × 10⁷ → ajusto: <b>1,0 × 10⁸</b>."],
+[2,"(8,4 × 10⁶) ÷ (2,0 × 10²)",[["M",4.2,0,"× 10 a la"],["n",4,0,""]],"Divide los números y resta las magnitudes.","8,4 ÷ 2,0 = 4,2 y 6 − 2 = 4 → <b>4,2 × 10⁴</b>."],
+[2,"(1,2 × 10⁴) ÷ (4,0 × 10⁻²)",[["M",3,0,"× 10 a la"],["n",5,0,""]],"Ojo con el signo: 4 − (−2).","0,3 × 10⁶ → ajusto: coma a la derecha, baja la magnitud → <b>3,0 × 10⁵</b>."],
+[2,"(2,5 × 10⁻³) + (4,0 × 10⁻⁴)",[["M",2.9,0,"× 10 a la"],["n",-3,0,""]],"Primero iguala las potencias a 10⁻³.","4,0 × 10⁻⁴ = 0,40 × 10⁻³ → 2,5 + 0,40 = <b>2,9 × 10⁻³</b>."],
+[2,"(7,8 × 10⁵) − (3,0 × 10⁴)",[["M",7.5,0,"× 10 a la"],["n",5,0,""]],"Iguala a 10⁵.","3,0 × 10⁴ = 0,30 × 10⁵ → 7,8 − 0,30 = <b>7,5 × 10⁵</b>."],
+[2,"(9,5 × 10²) + (8,0 × 10²)",[["M",1.75,0,"× 10 a la"],["n",3,0,""]],"Ya tienen la misma potencia. Al final ajusta.","17,5 × 10² → ajusto: <b>1,75 × 10³</b>."],
+[3,"Convierte 5 km a mm.",[["M",5,0,"× 10 a la"],["n",6,0,"mm"]],"kilo = 10³, mili = 10⁻³.","3 − (−3) = 6 → <b>5 × 10⁶ mm</b>."],
+[3,"Convierte 2,5 GB a MB.",[["M",2.5,0,"× 10 a la"],["n",3,0,"MB"]],"giga = 10⁹, mega = 10⁶.","9 − 6 = 3 → <b>2,5 × 10³ MB</b>."],
+[3,"Convierte 7 nm a µm.",[["M",7,0,"× 10 a la"],["n",-3,0,"µm"]],"nano = 10⁻⁹, micro = 10⁻⁶.","−9 − (−6) = −3 → <b>7 × 10⁻³ µm</b>."],
+[3,"Convierte 450 mg a kg, en notación científica.",[["M",4.5,0,"× 10 a la"],["n",-4,0,"kg"]],"mili = 10⁻³, kilo = 10³. Después ajusta.","−3 − 3 = −6 → 450 × 10⁻⁶ = <b>4,5 × 10⁻⁴ kg</b>."],
+[3,"Convierte 6 hL a mL.",[["M",6,0,"× 10 a la"],["n",5,0,"mL"]],"hecto = 10², mili = 10⁻³.","2 − (−3) = 5 → <b>6 × 10⁵ mL</b>."],
+[4,"Convierte 2,5 h a segundos.",[["Resultado",9000,0,"s"]],"1 h = 3600 s.","2,5 h × (3600 s / 1 h) = <b>9000 s</b>."],
+[4,"Convierte 108 km/h a m/s.",[["Resultado",30,0,"m/s"]],"Divide entre 3,6.","108 ÷ 3,6 = <b>30 m/s</b>."],
+[4,"Convierte 10 pies a metros (1 pie = 0,3048 m).",[["Resultado",3.048,0,"m"]],"El pie va abajo para cancelarse.","10 × 0,3048 = <b>3,048 m</b>."],
+[4,"Convierte 50 kg a libras (1 kg = 2,2 lb).",[["Resultado",110,0,"lb"]],"Aquí el kg va abajo.","50 kg × (2,2 lb / 1 kg) = <b>110 lb</b>."],
+[4,"Convierte 5 m² a cm².",[["Resultado",50000,0,"cm²"]],"1 m² = 10 000 cm².","5 × 10 000 = <b>50 000 cm²</b>."],
+[4,"Convierte 3,5 hectáreas a m² (1 hectárea = 10⁴ m²).",[["Resultado",35000,0,"m²"]],"Multiplica por 10 000.","3,5 × 10 000 = <b>35 000 m²</b>."],
+[4,"Convierte 2 m³ a galones (1 m³ = 264 galones).",[["Resultado",528,0,"galones"]],"Multiplica por 264.","2 × 264 = <b>528 galones</b>."],
+[5,"Convierte 25 °C a °F.",[["Resultado",77,0,"°F"]],"°F = 1,8 × °C + 32.","1,8 × 25 + 32 = 45 + 32 = <b>77 °F</b>."],
+[5,"Convierte 310 K a °C.",[["Resultado",36.85,0,"°C"]],"°C = K − 273,15.","310 − 273,15 = <b>36,85 °C</b>."],
+[5,"Convierte −40 °F a °C.",[["Resultado",-40,0,"°C"]],"Primero resta 32.","(−40 − 32) ÷ 1,8 = −72 ÷ 1,8 = <b>−40 °C</b>."],
+[5,"Convierte 50 °F a kelvin.",[["Resultado",283.15,0,"K"]],"Dos pasos: a °C y luego a K.","(50 − 32) ÷ 1,8 = 10 °C → 10 + 273,15 = <b>283,15 K</b>."],
+[5,"Convierte 373,15 K a °F.",[["Resultado",212,0,"°F"]],"Primero a °C.","373,15 − 273,15 = 100 °C → 1,8 × 100 + 32 = <b>212 °F</b>."],
+[6,"Una fuerza de 200 N forma un ángulo de 60°. Calcula sus componentes.",[["Fx",100,0.5,"N"],["Fy",173,0.5,"N"]],"Fx = F × cos θ y Fy = F × sen θ.","Fx = 200 × cos 60° = <b>100 N</b>. Fy = 200 × sen 60° = <b>173 N</b>."],
+[6,"Un vector tiene Rx = 30 m y Ry = 40 m. Calcula magnitud y dirección.",[["R",50,0,"m"],["Ángulo",53.13,0.1,"°"]],"Pitágoras y tan⁻¹.","R = √(900 + 1600) = <b>50 m</b>. θ = tan⁻¹(40 ÷ 30) = <b>53,13°</b> (cuadrante I)."],
+[6,"Un vector tiene Rx = −12 m y Ry = −5 m. Calcula magnitud y ángulo final.",[["R",13,0,"m"],["Ángulo final",202.62,0.1,"°"]],"Está en el cuadrante III: 180° + θ.","R = √(144 + 25) = <b>13 m</b>. θ = tan⁻¹(5 ÷ 12) = 22,62° → 180 + 22,62 = <b>202,62°</b>."],
+[6,"Un vector tiene Rx = 24 m y Ry = −7 m. Calcula magnitud y ángulo final.",[["R",25,0,"m"],["Ángulo final",343.74,0.1,"°"]],"Está en el cuadrante IV: 360° − θ.","R = √(576 + 49) = <b>25 m</b>. θ = tan⁻¹(7 ÷ 24) = 16,26° → 360 − 16,26 = <b>343,74°</b>."],
+[7,"Un ciclista recorre 18 km en 1,5 h. Calcula su rapidez.",[["En km/h",12,0,"km/h"],["En m/s",3.33,0.01,"m/s"]],"v = x ÷ t. Luego divide entre 3,6.","18 ÷ 1,5 = <b>12 km/h</b>. 12 ÷ 3,6 = <b>3,33 m/s</b>."],
+[7,"Un dron vuela 60 m al norte y luego 80 m al este, en 20 s.",[["Distancia",140,0,"m"],["Desplazamiento",100,0,"m"],["Rapidez",7,0,"m/s"],["Velocidad",5,0,"m/s"]],"Distancia: suma. Desplazamiento: Pitágoras.","Distancia 60 + 80 = <b>140 m</b>. Desplazamiento √(60² + 80²) = <b>100 m</b>. Rapidez 140 ÷ 20 = <b>7 m/s</b>. Velocidad 100 ÷ 20 = <b>5 m/s</b>, a 36,87° al norte del este."],
+[7,"Caminas 40 m al este y regresas 30 m al oeste, en 50 s.",[["Distancia",70,0,"m"],["Desplazamiento",10,0,"m"],["Rapidez",1.4,0,"m/s"],["Velocidad",0.2,0,"m/s"]],"Van en sentidos contrarios: en el desplazamiento se restan.","Distancia <b>70 m</b>. Desplazamiento 40 − 30 = <b>10 m</b> al este. Rapidez 70 ÷ 50 = <b>1,4 m/s</b>. Velocidad 10 ÷ 50 = <b>0,2 m/s</b> al este."],
+[7,"El sonido viaja a 340 m/s. Escuchas el trueno 5 s después del rayo. ¿A qué distancia cayó?",[["Distancia",1700,0,"m"]],"x = v × t.","340 m/s × 5 s = <b>1700 m</b>."],
+[7,"Un motociclista recorre 350 m en 40 s y luego 200 m en 10 s. ¿Cuál es su rapidez media?",[["Rapidez",11,0,"m/s"]],"Suma todas las distancias y todos los tiempos.","(350 + 200) ÷ (40 + 10) = 550 ÷ 50 = <b>11 m/s</b> (1,10 × 10¹)."],
+[7,"Un auto va de un aeropuerto a otro: 11,68 km por carretera y 8,34 km en línea recta, en 0,60 h. ¿Cuál es su velocidad media?",[["Velocidad",13.9,0.05,"km/h"]],"La velocidad usa el desplazamiento, no la distancia.","8,34 km ÷ 0,60 h = <b>13,9 km/h</b>. Con 11,68 km saldría la rapidez."],
+[8,"Un tren recorre 3,6 km a 20 m/s. ¿Cuánto tarda?",[["Tiempo",180,0,"s"]],"Convierte los km a m antes de dividir.","3,6 km = 3600 m → t = 3600 ÷ 20 = <b>180 s</b>."],
+[8,"Una masa de 5 kg acelera a 2 m/s². ¿Qué fuerza actúa?",[["Fuerza",10,0,"N"]],"F = m × a.","5 × 2 = <b>10 N</b>."],
+[8,"Una fuerza de 30 N actúa sobre 6 kg. ¿Qué aceleración produce?",[["Aceleración",5,0,"m/s²"]],"a = F ÷ m.","30 ÷ 6 = <b>5 m/s²</b>."],
+[8,"Un carro viaja a 90 km/h durante 2 h. ¿Qué distancia recorre?",[["En km",180,0,"km"],["En m",180000,0,"m"]],"x = v × t.","90 × 2 = <b>180 km</b> = <b>180 000 m</b> (1,80 × 10⁵ m)."],
+[8,"Un trozo de aluminio tiene 54 g de masa y densidad 2,7 g/cm³. ¿Qué volumen ocupa?",[["Volumen",20,0,"cm³"]],"V = m ÷ ρ.","54 ÷ 2,7 = <b>20 cm³</b>."],
+[8,"Una fuerza de 100 N actúa sobre 2 m². ¿Qué presión produce?",[["Presión",50,0,"Pa"]],"P = F ÷ A.","100 ÷ 2 = <b>50 Pa</b>."]
+].map(([t,p,f,h,s],i)=>({i,t,p,f,h,s}));
+
+const QPLAN=[2,3,3,2,2,2,2,3,1], EPLAN=[0,1,2,1,1,1,1,2,1];
+const KEY="aulaCienciasAle2";
+const blank=()=>({ts:0,done:[],best:{},st:{},fallos:{},pend:[],exams:[],log:[]});
+const norm=s=>Object.assign(blank(),JSON.parse(JSON.stringify(s||{})));
+let state=blank();
+try{state=norm(JSON.parse(localStorage.getItem(KEY)||"null"))}catch(e){}
+function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+const $=s=>document.querySelector(s), main=$("#main");
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const th=t=>`class="th" style="--h:${HUES[t]}"`;
+const now=()=>new Date().toLocaleString("es-CR",{dateStyle:"short",timeStyle:"short"});
+let view="inicio", session=null, readOnly=false;
+
+/* ---- Nube: un documento compartido aula/ale ---- */
+let ref=null, pushing=false, dirty=false, pushTimer=null;
+function setSync(t){$("#sync").textContent=t}
+function touch(){if(readOnly)return;state.ts=Date.now();saveLocal();if(ref){dirty=true;clearTimeout(pushTimer);pushTimer=setTimeout(push,1200)}}
+async function push(){if(!ref||pushing||!dirty||readOnly)return;pushing=true;dirty=false;
+  try{await ref.set(JSON.parse(JSON.stringify(state)));setSync("☁ Guardado en la nube")}
+  catch(e){if(e&&e.code==="invalid_argument"){readOnly=true;setSync("Panel familiar · solo lectura")}else{dirty=true;setSync("Sin conexión · guardado en este dispositivo")}}
+  pushing=false;if(dirty&&!readOnly){clearTimeout(pushTimer);pushTimer=setTimeout(push,3000)}}
+(async()=>{
+  if(!(window.claude&&window.claude.use)){setSync("Guardado solo en este dispositivo");return}
+  let db=null,user=null;
+  try{db=await window.claude.use("db");user=await window.claude.use("user")}catch(e){}
+  if(!db){setSync("Guardado solo en este dispositivo");return}
+  try{if(user&&(await user.can("data.write"))===false){readOnly=true}}catch(e){}
+  ref=db.doc("aula/ale");
+  const timer=setTimeout(()=>setSync("Sin conexión con la nube todavía"),10000);
+  ref.onSnapshot(snap=>{
+    if(snap.metadata.hasPendingWrites)return;
+    if(snap.exists){const r=snap.data();
+      if(readOnly||(r.ts||0)>(state.ts||0)){state=norm(r);saveLocal();if(["inicio","progreso","errores"].includes(view))go(view)}
+      else if((state.ts||0)>(r.ts||0)){dirty=true;push()}}
+    else if(state.ts&&!readOnly){dirty=true;push()}
+    if(!snap.metadata.fromCache){clearTimeout(timer);setSync(readOnly?"Panel familiar · solo lectura":"☁ Guardado en la nube")}
+  },()=>{clearTimeout(timer);setSync("Guardado solo en este dispositivo")});
+})();
+
+function go(v,arg){view=v;document.querySelectorAll("#nav button").forEach(b=>b.dataset.view===v||(v==="tema"&&b.dataset.view==="inicio")?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
+  ({inicio:renderHome,tema:renderLesson,practica:renderPractice,errores:renderErrors,simulacro:renderExam,progreso:renderProgress})[v](arg);window.scrollTo(0,0)}
+const roNote=()=>readOnly?'<div class="note">Estás en el panel familiar: puedes ver todo y practicar, pero lo que hagas aquí no cambia el progreso de Ale.</div>':"";
+const stTxt=t=>{const s=state.st[t];return s?`${s.c}/${s.a}`:"—"};
+
+function renderHome(){
+  const n=state.done.length;
+  main.innerHTML=`<div class="stack">${roNote()}<div class="card"><div class="row" style="justify-content:space-between"><b>${n} de ${TOPICS.length} temas estudiados</b><span class="muted">1. Estudia las llaves · 2. Resuelve · 3. Refuerza tus errores · 4. Simulacro</span></div><div class="bar" style="margin-top:10px"><i style="width:${n/TOPICS.length*100}%"></i></div></div>
+  <div class="grid">${TOPICS.map((t,i)=>`<div ${th(i).replace('class="th"','class="th topic"')}><span class="num">Tema ${i+1}</span><h3>${t.t}</h3><p>${t.s}</p><div class="row">${state.done.includes(i)?'<span class="pill ok">Estudiado</span>':'<span class="pill">Pendiente</span>'}<span class="pill">Ejercicios: ${stTxt(i)}</span>${state.fallos[i]?`<span class="pill no">${state.fallos[i]} fallos</span>`:""}</div><div class="row"><button class="primary" data-act="tema" data-i="${i}">Estudiar</button><button data-act="resolver" data-i="${i}">Resolver</button><button data-act="practicar" data-i="${i}">Preguntas</button></div></div>`).join("")}</div></div>`;
+}
+function renderLesson(i){
+  const t=TOPICS[i],done=state.done.includes(i);
+  main.innerHTML=`<div class="card"><div ${th(i).replace('class="th"','class="th lesson"')}><span class="tag">Tema ${i+1} de ${TOPICS.length}</span><h2>${t.t}</h2>
+  <h3 style="margin-top:6px">🔑 Llaves del tema</h3><div class="keys">${KEYS[i].map(k=>`<div class="key"><strong>${k[0]}</strong>${k[1]}</div>`).join("")}</div>${t.h}</div>
+  <div class="row" style="margin-top:18px"><button class="primary" data-act="hecho" data-i="${i}">${done?"Estudiado ✓":"Marcar como estudiado"}</button><button data-act="resolver" data-i="${i}">Resolver ejercicios</button><button data-act="practicar" data-i="${i}">Preguntas rápidas</button>${i<TOPICS.length-1?`<button data-act="tema" data-i="${i+1}">Siguiente tema →</button>`:""}</div></div>`;
+}
+function renderPractice(){
+  main.innerHTML=`<div class="stack">${roNote()}<div class="card"><h2>Practicar</h2><p class="muted">En <b>Resolver</b> escribes tu resultado, como en el examen, y ves los pasos. En <b>Preguntas</b> eliges una opción.</p>
+  <div class="scroll"><table class="plain">${TOPICS.map((t,i)=>`<tr ${th(i)}><td><b style="color:var(--strong)">${i+1}. ${t.t}</b></td><td><div class="row"><button class="primary" data-act="resolver" data-i="${i}">Resolver (${E.filter(e=>e.t===i).length})</button><button data-act="practicar" data-i="${i}">Preguntas (${Q.filter(q=>q.t===i).length})</button></div></td></tr>`).join("")}</table></div>
+  <div class="row" style="margin-top:14px"><button data-act="resolver" data-i="-1">Mezcla: 10 ejercicios de todo</button><button data-act="practicar" data-i="-1">Mezcla: 15 preguntas de todo</button></div></div></div>`;
+}
+function start(title,items,ti,kind){
+  session={mode:"p",ti,kind,list:items,ans:{},res:{}};
+  main.innerHTML=`<div class="card"><h2>${title}</h2><div id="qs">${items.map(itemHtml).join("")}</div><div id="end"></div></div>`;
+}
+function itemHtml(it,n){const d=it.d,tag=`<span class="tag" style="--strong:hsl(${HUES[d.t]} 70% var(--strong-l))">Tema ${d.t+1} · ${TOPICS[d.t].t}</span>`;
+  if(it.k==="q")return `<div class="q" data-n="${n}">${tag}<p>${n+1}. ${d.q}</p><div class="opts">${d.o.map((o,j)=>`<button class="opt" data-act="resp" data-n="${n}" data-j="${j}">${"ABCD"[j]}. ${o}</button>`).join("")}</div><div class="fbx"></div></div>`;
+  return `<div class="q" data-n="${n}">${tag}<p>${n+1}. ${d.p}</p><div class="fields">${d.f.map((f,j)=>`<label for="f${n}_${j}">${f[0]} <input id="f${n}_${j}" inputmode="text" autocomplete="off" placeholder="?"> <span class="muted">${f[3]}</span></label>`).join("")}</div>${session.mode==="p"?`<div class="row"><button class="primary" data-act="rev" data-n="${n}">Revisar</button><button data-act="pista" data-n="${n}">Ver una pista</button></div>`:""}<div class="fbx"></div></div>`}
+const parse=s=>{s=String(s).trim().replace(/\s/g,"").replace(/[−–]/g,"-").replace(",",".");return s===""?NaN:Number(s)};
+function checkE(n){const e=session.list[n].d,box=main.querySelector(`.q[data-n="${n}"]`);let ok=0;
+  e.f.forEach((f,j)=>{const inp=$(`#f${n}_${j}`),v=parse(inp.value),tol=f[2]||Math.abs(f[1])*1e-9+1e-12,good=Math.abs(v-f[1])<=tol;inp.disabled=true;inp.className=good?"ok":"no";if(good)ok++});
+  box.querySelectorAll("button").forEach(b=>b.disabled=true);
+  const all=ok===e.f.length;
+  box.querySelector(".fbx").innerHTML=`<div class="fb ${all?"good":"bad"}">${all?"¡Correcto!":ok?`Vas bien: ${ok} de ${e.f.length} resultados correctos.`:"Todavía no. Mira los pasos y compáralos con los tuyos."}</div><div class="steps"><b>Pasos:</b> ${e.s}</div>`;
+  return ok/e.f.length}
+function markQ(n){const q=session.list[n].d,j=session.ans[n],box=main.querySelector(`.q[data-n="${n}"]`);
+  box.querySelectorAll(".opt").forEach((b,k)=>{b.disabled=true;b.classList.remove("sel");if(k===q.a)b.classList.add("right");else if(k===j)b.classList.add("wrong")});
+  const ok=j===q.a;box.querySelector(".fbx").innerHTML=`<div class="fb ${ok?"good":"bad"}">${j==null?"Sin responder. ":ok?"¡Correcto! ":"No es correcto. "}${q.e}</div>`;return ok?1:0}
+function record(it,frac){if(readOnly)return;const t=it.d.t,id=it.k+it.d.i,ok=frac===1;
+  if(it.k==="e"){const s=state.st[t]||(state.st[t]={a:0,c:0});s.a++;if(ok)s.c++}
+  if(ok)state.pend=state.pend.filter(x=>x!==id);else{if(!state.pend.includes(id))state.pend.push(id);state.fallos[t]=(state.fallos[t]||0)+1}}
+function stepDone(n,frac){session.res[n]=frac;record(session.list[n],frac);
+  const total=session.list.length,done=Object.keys(session.res).length;
+  if(done===total){const pts=Object.values(session.res).reduce((a,b)=>a+b,0),pct=Math.round(pts/total*100);
+    if(!readOnly){if(session.kind==="q"&&session.ti>=0)state.best[session.ti]=Math.max(state.best[session.ti]||0,pct);
+      const name=session.ti>=0?TOPICS[session.ti].t:session.ti===-2?"Refuerzo de errores":"Mezcla";
+      state.log.unshift({d:now(),w:(session.kind==="q"?"Preguntas":"Ejercicios")+": "+name,r:pct+"%"});state.log=state.log.slice(0,50)}
+    $("#end").innerHTML=`<div class="ex"><b>Resultado: ${pct}%.</b> ${pct>=80?"¡Muy bien! Esto ya lo dominas.":"Lo que fallaste quedó guardado en «Mis errores» para reforzarlo."}</div><div class="row"><button class="primary" data-act="ir" data-v="errores">Ver mis errores</button><button data-act="ir" data-v="practica">Seguir practicando</button></div>`}
+  touch()}
+const pick=id=>id[0]==="q"?{k:"q",d:Q[+id.slice(1)]}:{k:"e",d:E[+id.slice(1)]};
+function renderErrors(){
+  const items=state.pend.map(pick).filter(x=>x.d);
+  const byT={};items.forEach(x=>byT[x.d.t]=(byT[x.d.t]||0)+1);
+  main.innerHTML=`<div class="stack">${roNote()}<div class="card"><h2>Mis errores para reforzar</h2>${items.length?`<p>Tienes <b>${items.length}</b> ejercicios o preguntas por corregir. Cuando los resuelvas bien, salen de la lista.</p><div class="row">${Object.keys(byT).map(t=>`<span class="pill no" >Tema ${+t+1}: ${byT[t]}</span>`).join("")}</div><div class="row" style="margin-top:14px"><button class="primary" data-act="reforzar">Reforzar ahora</button></div>
+  <h3>Antes, repasa las llaves de:</h3><div class="row">${Object.keys(byT).map(t=>`<button data-act="tema" data-i="${t}">Tema ${+t+1}: ${TOPICS[t].t}</button>`).join("")}</div>`:'<p class="muted">No tienes errores pendientes. Practica o haz un simulacro y aquí aparecerá lo que haya que reforzar.</p>'}</div></div>`;
+}
+function renderExam(){
+  let qs=[],es=[];QPLAN.forEach((k,t)=>qs=qs.concat(shuffle(Q.filter(q=>q.t===t)).slice(0,k)));EPLAN.forEach((k,t)=>es=es.concat(shuffle(E.filter(e=>e.t===t)).slice(0,k)));
+  const list=qs.map(d=>({k:"q",d})).concat(es.map(d=>({k:"e",d})));
+  session={mode:"e",list,ans:{},sent:false};
+  main.innerHTML=`<div class="card"><h2>Simulacro de examen · 60 puntos</h2><p class="muted">Parte I: 20 preguntas de selección (1 punto cada una). Parte II: 10 ejercicios para resolver (4 puntos cada uno). Usa calculadora y papel, y escribe todos los pasos como pide la profe. Se revisa al entregar.</p>
+  <div class="ex">Fórmulas: °F = 1,8 × °C + 32 · °C = (°F − 32) ÷ 1,8 · K = °C + 273,15 · °C = K − 273,15</div>
+  <div id="top"></div><h3>Parte I · Selección</h3><div id="qs">${list.slice(0,20).map(itemHtml).join("")}</div><h3>Parte II · Resuelve</h3><div>${list.slice(20).map((it,k)=>itemHtml(it,k+20)).join("")}</div>
+  <div id="end" class="row" style="margin-top:14px"><button class="primary" data-act="entregar">Entregar simulacro</button></div></div>`;
+}
+function submitExam(){
+  if(session.sent)return;session.sent=true;let pts=0;const miss={};
+  session.list.forEach((it,n)=>{const f=it.k==="q"?markQ(n):checkE(n);pts+=it.k==="q"?f:Math.round(f*4);record(it,f);if(f<1)miss[it.d.t]=(miss[it.d.t]||0)+1});
+  const nota=Math.round(pts/60*100);
+  if(!readOnly){state.exams.unshift({pts,date:now()});state.exams=state.exams.slice(0,15);state.log.unshift({d:now(),w:"Simulacro",r:pts+"/60"});state.log=state.log.slice(0,50)}
+  touch();
+  const weak=Object.keys(miss).sort((a,b)=>miss[b]-miss[a]);
+  $("#end").innerHTML="";
+  $("#top").innerHTML=`<div class="card" style="margin:12px 0;background:var(--soft)"><div class="row" style="gap:18px"><span class="big">${pts}/60</span><span><b>Nota: ${nota}</b></span></div>${weak.length?`<p style="margin:12px 0 6px"><b>Repasa primero:</b></p><div class="row">${weak.map(t=>`<button data-act="tema" data-i="${t}">Tema ${+t+1}: ${TOPICS[t].t} (${miss[t]})</button>`).join("")}</div>`:"<p><b>¡Perfecto! Todo correcto.</b></p>"}<div class="row" style="margin-top:12px"><button class="primary" data-act="ir" data-v="errores">Reforzar mis errores</button><button data-act="ir" data-v="simulacro">Otro simulacro</button></div></div>`;
+  window.scrollTo(0,0);
+}
+function renderProgress(){
+  const ratio=t=>{const s=state.st[t];return s&&s.a?s.c/s.a:null};
+  const weak=TOPICS.map((_,i)=>i).filter(i=>state.fallos[i]).sort((a,b)=>state.fallos[b]-state.fallos[a]).slice(0,3);
+  main.innerHTML=`<div class="stack"><div class="card"><h2>Progreso de Ale · panel familiar</h2><p class="muted">${state.ts?"Última actividad: "+new Date(state.ts).toLocaleString("es-CR",{dateStyle:"medium",timeStyle:"short"}):"Todavía no hay actividad."}</p>
+  ${weak.length?`<div class="note"><b>Temas a reforzar:</b> ${weak.map(i=>`${TOPICS[i].t} (${state.fallos[i]} fallos)`).join(" · ")}</div>`:""}
+  <div class="scroll"><table class="plain"><tr><th>Tema</th><th>Estudio</th><th>Ejercicios bien</th><th>Preguntas</th><th>Fallos</th></tr>${TOPICS.map((t,i)=>{const r=ratio(i);return `<tr><td>${i+1}. ${t.t}</td><td>${state.done.includes(i)?'<span class="pill ok">Estudiado</span>':'<span class="pill">Pendiente</span>'}</td><td>${r==null?"—":`<span class="pill ${r>=.8?"ok":r<.5?"no":""}">${stTxt(i)}</span>`}</td><td>${state.best[i]!=null?state.best[i]+"%":"—"}</td><td>${state.fallos[i]||0}</td></tr>`}).join("")}</table></div>
+  <p class="muted">Errores pendientes de corregir: <b>${state.pend.length}</b></p></div>
+  <div class="card"><h3 style="margin-top:0">Simulacros</h3>${state.exams.length?`<table class="plain"><tr><th>Fecha</th><th>Puntos</th><th>Nota</th></tr>${state.exams.map(e=>`<tr><td>${e.date}</td><td>${e.pts}/60</td><td>${Math.round(e.pts/60*100)}</td></tr>`).join("")}</table>`:'<p class="muted">Todavía no hay simulacros.</p>'}</div>
+  <div class="card"><h3 style="margin-top:0">Actividad reciente</h3>${state.log.length?`<table class="plain">${state.log.slice(0,20).map(l=>`<tr><td>${l.d}</td><td>${l.w}</td><td>${l.r}</td></tr>`).join("")}</table>`:'<p class="muted">Sin actividad todavía.</p>'}
+  ${readOnly?"":'<div class="row" style="margin-top:14px" id="resetBox"><button data-act="reset1">Borrar todo el progreso</button></div>'}</div></div>`;
+}
+document.addEventListener("click",ev=>{
+  const b=ev.target.closest("button");if(!b)return;
+  if(b.dataset.view)return go(b.dataset.view);
+  const a=b.dataset.act,i=+b.dataset.i,n=+b.dataset.n;
+  if(a==="tema")go("tema",i);
+  else if(a==="ir")go(b.dataset.v);
+  else if(a==="practicar"){view="practica";const l=i<0?shuffle(Q).slice(0,15):shuffle(Q.filter(q=>q.t===i));start(i<0?"Preguntas: mezcla de todo":"Preguntas: "+TOPICS[i].t,l.map(d=>({k:"q",d})),i,"q");window.scrollTo(0,0)}
+  else if(a==="resolver"){view="practica";const l=i<0?shuffle(E).slice(0,10):E.filter(e=>e.t===i);start(i<0?"Resolver: mezcla de todo":"Resolver: "+TOPICS[i].t,l.map(d=>({k:"e",d})),i,"e");window.scrollTo(0,0)}
+  else if(a==="reforzar"){view="practica";start("Refuerzo de mis errores",shuffle(state.pend.map(pick).filter(x=>x.d)),-2,"e");window.scrollTo(0,0)}
+  else if(a==="hecho"){if(!readOnly&&!state.done.includes(i)){state.done.push(i);touch()}renderLesson(i)}
+  else if(a==="resp"){if(session.mode==="p"){if(session.ans[n]!=null)return;session.ans[n]=+b.dataset.j;stepDone(n,markQ(n))}
+    else{if(session.sent)return;session.ans[n]=+b.dataset.j;main.querySelectorAll(`.q[data-n="${n}"] .opt`).forEach((x,k)=>x.classList.toggle("sel",k===+b.dataset.j))}}
+  else if(a==="rev")stepDone(n,checkE(n));
+  else if(a==="pista"){const fb=main.querySelector(`.q[data-n="${n}"] .fbx`);fb.innerHTML=`<div class="fb hint">Pista: ${session.list[n].d.h}</div>`}
+  else if(a==="entregar")submitExam();
+  else if(a==="reset1")$("#resetBox").innerHTML='<b>¿Seguro? Se borra en todos los dispositivos.</b><button class="primary" data-act="reset2">Sí, borrar</button><button data-act="ir" data-v="progreso">Cancelar</button>';
+  else if(a==="reset2"){state=blank();touch();renderProgress()}
+});
+go("inicio");
+
+</script>
+</body>
+</html>
